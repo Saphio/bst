@@ -7,6 +7,7 @@ class Node {
  public:
   Node ();
   Node (int v);
+  // getters and setters
   void setLeft (Node* l);
   void setRight (Node* r);
   void setValue (int v);
