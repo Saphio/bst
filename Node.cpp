@@ -10,15 +10,17 @@ Node::Node () {
 }
 
 Node::Node (int v) {
+  left = NULL;
+  right = NULL;
   value = v;
 }
 
 // setters
 void Node::setLeft (Node* l) { left = l; }
 void Node::setRight (Node* r) { right = r; }
-void Node::setValue (char v) { value = v; }
+void Node::setValue (int v) { value = v; }
 
 // getters
 Node* Node::getLeft () { return left; }
 Node* Node::getRight () { return right; }
-char Node::getValue () { return value; }
+int Node::getValue () { return value; }

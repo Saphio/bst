@@ -8,6 +8,7 @@ using namespace std;
 
 vector<int> parseInput ();
 void add (Node* &root, vector<int> nums);
+void insert (Node* cur, int n);
 void remove (Node* &root);
 void display (Node* cur, int indent);
 
@@ -18,7 +19,7 @@ int main () {
 
   while (isRunning) {
     // print commands
-    cout << "Commands:" << endl;
+    cout << endl << "Commands:" << endl;
     cout << "ADD -- add numbers" << endl;
     cout << "REMOVE -- remove numbers" << endl;
     cout << "PRINT -- display tree" << endl;
@@ -45,6 +46,7 @@ int main () {
   return 0;
 }
 
+// read in input to be added
 vector<int> parseInput () {
   cout << "File or console input? (F/C) ";
   string input;
@@ -65,34 +67,130 @@ vector<int> parseInput () {
   }
   else if (input == "C") {
     int n, x;
-    cout << "How many numbers?" << endl;
-    cin >> n; cin.get(); cout << endl << "Reading...";
+    cout << "How many numbers? ";
+    cin >> n; cin.get(); cout << "Reading...";
     for (int i = 0; i < n; i++) {
       cin >> x; nums.push_back(x);
     }
     cin.get();
-    cout << endl << "Done." << endl;
+    cout << "Done." << endl;
   }
   else { cout << "Bad input!" << endl; }
 
+  return nums;
+}
+
+// for all the numbers to be added, insert them into the tree
+void add (Node* &root, vector<int> nums) {
+  for (int i : nums) { insert (root, i); }
   return;
 }
 
+// insert a node into the tree
+void insert (Node* cur, int n) {
+  if (cur->getValue() == 0) { cur->setValue(n); } // no value here
+  else if (n <= cur->getValue()) {
+    if (cur->getLeft() != NULL) { insert (cur->getLeft(), n); }
+    else { cur->setLeft (new Node(n)); }
+  }
+  else if (n > cur->getValue()) {
+    if (cur->getRight() != NULL) { insert (cur->getRight(), n); }
+    else { cur->setRight (new Node(n)); }
+  }
+  return;
+}
 
+// remove a node from the tree
+void remove (Node* &root) {
+  cout << "Which node?" << endl;
+  int v; cin >> v; cin.get();
 
-void remove (Node* &root);
+  // find the node
+  Node* prev = root;
+  Node* cur = root;
+  while (cur->getValue() != v) {
+    if (cur->getValue() > v) {
+      if (cur->getLeft() != NULL) {
+	prev = cur;
+	cur = cur->getLeft();
+      }
+      else { cout << "Node doesn't exist." << endl; return; }
+    }
+    else if (cur->getValue() < v) {
+      if (cur->getRight() != NULL) {
+	prev = cur;
+	cur = cur->getRight();
+      }
+      else { cout << "Node doesn't exist." << endl; return; }
+    }
+  }
+
+  // zero-child deletion
+  int numChildren = 0;
+  if (cur->getLeft() != NULL) { numChildren ++; }
+  if (cur->getRight() != NULL) { numChildren ++; }
+  bool toTheRight = prev->getRight() == cur;
+
+  cout << "NUMCHILDREN: " << numChildren << endl;
+  cout << "TOTHERIGHT: " << toTheRight << endl;
+  cout << "VALUE OF PREV: " << prev->getValue() << endl;
+  cout << "VALUE OF CUR: " << cur->getValue() << endl;
+  
+  if (numChildren == 0) {
+    // remove the head
+    if (cur == root) { root = new Node(); }
+    // cur is to the right of prev
+    if (toTheRight) { prev->setRight (NULL); }
+    // cur is to the left of prev
+    else { prev->setLeft (NULL); }
+    // do I need to delete the node or smth here?
+  }
+  else if (numChildren == 1) {
+    // get the child node
+    Node* child = cur->getRight();
+    if (cur->getLeft() != NULL) { child = cur->getLeft(); }
+    cout << "CHILD VALUE: " << child->getValue() << endl;
+    
+    // remove the head
+    if (cur == root) { root = child; }
+    // cur is to the right of prev
+    else if (toTheRight) { prev->setRight(child); }
+    // cur is to the left of prev
+    else { prev->setLeft(child); }      
+  }
+  else if (numChildren == 2) {
+    // get the target node
+    Node* prevTarget = cur;
+    Node* target = cur->getRight();
+    while (target->getLeft() != NULL) { prevTarget = target; target = target->getLeft(); }
+    // sub in successor's value
+    int temp = target->getValue();
+    int old = cur->getValue();
+    cur->setValue (temp);
+    // delete original successor node
+    // one child deletion
+    if (target->getRight() != NULL) { prevTarget->setRight (target->getRight()); }
+    // or zero child deletion
+    else if (prevTarget->getRight() == target) { prevTarget->setRight (NULL); } 
+    else { prevTarget->setLeft (NULL); }
+  }
+  else { cout << "Error." << endl; return; }
+  cout << "Done." << endl;
+  return;
+}
 // zero child deletion - just remove the node
 // one child deletion - connect parent of cur to child of cur, unless cur is
 // head, in which the new head is cur
 // two child deletion - go to the right, then as left as possible, and move
 // that value to cur's place. then use one child deletion on that original node
 
-
+// display the tree
 void display (Node* cur, int indent) {
-  if (cur == NULL) return;
+  if (cur == NULL) return; 
   display (cur->getRight(), indent + 1);
   for (int i = 0; i < indent; i++) { cout << "    "; }
-  cout << cur->getValue() << endl;
+  if (cur->getValue() == 0) { cout << endl; }
+  else { cout << cur->getValue() << endl; }
   display (cur->getLeft(), indent + 1);
   return;
 }
