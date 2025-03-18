@@ -10,6 +10,6 @@ functions:
 
 - SEARCH: search for a number in the tree
 
-- RPINT: display the tree
+- PRINT: display the tree
 
 - QUIT: quit the program
